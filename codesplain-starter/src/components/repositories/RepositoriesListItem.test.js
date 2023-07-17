@@ -2,12 +2,6 @@ import { screen, render } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import RepositoriesListItem from "./RepositoriesListItem";
 
-jest.mock('../tree/FileIcon', () => {
-  return () => {
-    return 'File Icon Component';
-  }
-})
-
 function renderComponent() {
   const repository = {
     full_name: "facebook/react",
@@ -23,18 +17,24 @@ function renderComponent() {
       <RepositoriesListItem repository={repository} />
     </MemoryRouter>
   );
+
+  return { repository };
 }
 
 test("shows a link to github homepage for this repository", async () => {
-  renderComponent();
+  const { repository } = renderComponent();
 
-  // await screen.findByRole("img", { name: "JavaScript" });
+  await screen.findByRole("img", { name: "JavaScript" });
+
+  const link = screen.getByRole("link", {
+    name: /github repository/i,
+  });
+  expect(link).toHaveAttribute("href", repository.html_url);
 });
 
-const pause = () => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve();
-    }, 100);
-  });
-};
+test("shows a fileicon with the appropriate icon", async () => {
+  renderComponent();
+
+  const icon = await screen.findByRole("img", { name: "JavaScript" });
+  expect(icon).toHaveClass("js-icon");
+});
